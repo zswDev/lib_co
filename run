@@ -1,0 +1,2 @@
+g++ -std=c++11  acosw.S aco.c $1 -o done -lpthread
+./done
