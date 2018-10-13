@@ -17,6 +17,7 @@ New writing method;
             // TODO Asynchronous task, Run in thread pool
             return null;
         }
+        cout<<v.data<<endl;
         aco_exit();
     })
     loop();
