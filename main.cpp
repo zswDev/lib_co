@@ -2,10 +2,8 @@
 #include "co.h"
 
 void gen(){
-    // TODO 解决偶然出错问题
 
     string name = "aa";
-    cout<<name<<":"<<123<<endl;
 
     auto v = yield [&]()->string{
         sleep(1);
@@ -16,7 +14,7 @@ void gen(){
 
     v = yield [&]()->string{
         sleep(1);
-        cout<<name<<endl;
+        //cout<<name<<endl;
         return "this is worker 2";
     };
     cout<<v.data<<endl;
@@ -36,12 +34,14 @@ void gen(){
         sleep(1);
     });
     cout<<v<<endl; */
-    close();
+    //close();
+
     aco_exit();
 }
 
 
 int main(){
     th t1(gen);
+    th t2(gen);
     loop();
 }

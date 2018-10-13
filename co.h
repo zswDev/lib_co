@@ -45,6 +45,7 @@ public:
     th(aco_cofuncp_t fp){
         if (!isInit) {
             init();
+            isInit = true;
         }
         co = aco_create(main_co, sstk,0,fp,&msg); 
         msg.tid = get_tid();
@@ -56,8 +57,6 @@ public:
 
 string worker(function<void(void* data)> cb){
     Message* self = (Message*)aco_get_arg();
-   // thread th1(cb,self);
-    //th1.detach();
     add_task(self,cb); 
     aco_yield();
     return self->data;

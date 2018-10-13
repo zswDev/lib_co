@@ -6,24 +6,34 @@ struct Task {
     Func func;
     void* data;
 };
+struct Self_Task{
+    mutex self_look;
+    queue<Task>* task;
+};
 
-vector<queue<Task>*> vtask; // 任务组
-thread_local queue<Task> self_queue;
+vector<Self_Task*> vtask; // 线程队列
+thread_local queue<Task> self_queue; // 线程本地任务队列
 mutex t_look;
 atomic<bool> off_on = {true};
 void work(int idx){
     t_look.lock();
-    vtask[idx] = &self_queue;
+
+    Self_Task st;
+    st.task = &self_queue;
+    vtask[idx] = &st;
+
     t_look.unlock();
     while(off_on){
         // TODO 无任务尝试从 其他线程窃取，或从全局队列拿
         usleep(1000);
+        st.self_look.lock();
         while(!self_queue.empty()) {
             Task t1 = self_queue.front();
             printf("t-%i:\n",idx);
             t1.func(t1.data);
             self_queue.pop();  
         }
+        st.self_look.unlock();
     }
 }
 
@@ -50,16 +60,28 @@ int  getid(int n=4){
     return val;
 }
 
+
+Self_Task* vt = NULL;
+
 void add_task(void* data,Func f1) {
     Task t1;
     t1.func = f1;
     t1.data = data;
     int idx = getid();
     
-    t_look.lock();
-    vtask[idx]->push(t1);
-    t_look.unlock();
+    vt = vtask[idx];
+    vt->self_look.lock();
+    vt->task->push(t1);
+    vt->self_look.unlock();
 }
+
+/*
+   metux vtask： 线程添加队列 ，
+   工作线程间并发 ，独立的锁
+   
+   metux vtask[tid]： 线程 本地 任务队列，
+   主线程和工作线程并发， 一线程一锁，提高并发
+*/
 
 /*
 int main(){

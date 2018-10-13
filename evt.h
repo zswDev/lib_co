@@ -42,6 +42,7 @@ void loop(){
     Node n1;
     while(isExit) {
         usleep(1000);
+        look.unlock();
         while(!task.empty()){
             n1 = task.front();
             List* li = on_user[n1.evt_name];       
@@ -51,5 +52,6 @@ void loop(){
             }
             task.pop();
         }
+        look.unlock();
     }
 }
