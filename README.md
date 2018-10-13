@@ -12,7 +12,7 @@ example:
 ```
 New writing method;
 ```c++
-    th t([](){
+    co([]()->void{
         auto v = yield [&]()->void* {
             // TODO Asynchronous task, Run in thread pool
             return null;

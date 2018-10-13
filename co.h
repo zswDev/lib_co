@@ -55,6 +55,10 @@ public:
     }
 };
 
+void co(aco_cofuncp_t fp) {
+    th* t = new th(fp);
+}
+
 string worker(function<void(void* data)> cb){
     Message* self = (Message*)aco_get_arg();
     add_task(self,cb); 

@@ -41,7 +41,7 @@ void gen(){
 
 
 int main(){
-    th t1(gen);
-    th t2(gen);
+    co(gen);
+    co(gen);
     loop();
 }
