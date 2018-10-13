@@ -4,6 +4,9 @@
 #include "util.h"
 #include "pool.h"
 
+#define yield  c +
+
+
 struct  Message {
     long tid;
     string data;
@@ -60,3 +63,18 @@ void send(void* msg, string data){
     mess->data = data;
     evt_emit("run",msg);
 }
+
+class Co{
+public:
+    string data;
+    Co operator+(function<string()> func){
+        string data = worker([&](void* data)->void {
+            string val = func();
+            send(data,val);
+        });
+        Co c1;
+        c1.data = data;
+        return c1;
+    }
+};
+Co c;
