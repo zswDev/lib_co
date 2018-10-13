@@ -2,7 +2,7 @@
 #include "co.h"
 
 void gen(){
-    // TODO 解决出错问题
+    // TODO 解决偶然出错问题
 
     string name = "aa";
     cout<<name<<":"<<123<<endl;
@@ -36,17 +36,12 @@ void gen(){
         sleep(1);
     });
     cout<<v<<endl; */
-
     close();
-
-    cout<<name<<":"<<111<<endl;
     aco_exit();
 }
 
 
 int main(){
-    init();
-
     th t1(gen);
     loop();
 }

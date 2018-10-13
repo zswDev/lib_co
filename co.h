@@ -6,6 +6,7 @@
 
 #define yield  c +
 
+atomic<bool> isInit = {false};
 
 struct  Message {
     long tid;
@@ -42,9 +43,13 @@ private:
     aco_t* co = NULL;
 public:
     th(aco_cofuncp_t fp){
+        if (!isInit) {
+            init();
+        }
         co = aco_create(main_co, sstk,0,fp,&msg); 
-       msg.tid = get_tid();
+        msg.tid = get_tid();
         tid_um[msg.tid] = co;
+
         aco_resume(co);
     }
 };
