@@ -18,7 +18,8 @@ void evt_on(string evt_name,function<void(void*)> cb){
     if (on_user[evt_name] == NULL) {
         on_user[evt_name] = li;
     } else {
-        on_user[evt_name]->next = li;
+        li->next = on_user[evt_name];
+        on_user[evt_name]= li;
     }
 }
 
@@ -35,8 +36,10 @@ void evt_emit(string evt_name,void* data){
 
 atomic<bool> isExit = {true};
 void evt_close(){
-    isExit = false;
-    cout<<"event loop close"<<endl;
+    if (isExit) {
+        isExit = false;
+        cout<<"event loop close"<<endl;
+    }
 }
 void loop(){
     Node n1;

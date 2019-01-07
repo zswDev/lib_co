@@ -11,11 +11,12 @@ struct Self_Task{
     queue<Task>* task;
 };
 
-vector<Self_Task*> vtask; // 线程队列
+vector<Self_Task*> vtask = {}; // 线程队列
 thread_local queue<Task> self_queue; // 线程本地任务队列
 mutex t_look;
 atomic<bool> off_on = {true};
 void work(int idx){
+    
     t_look.lock();
 
     Self_Task st;
@@ -23,6 +24,7 @@ void work(int idx){
     vtask[idx] = &st;
 
     t_look.unlock();
+
     while(off_on){
         // TODO 无任务尝试从 其他线程窃取，或从全局队列拿
         usleep(1000);
@@ -48,16 +50,21 @@ void start(int n=4){
     //vtask[n] = &self_queue;
 }
 void end(){
-    off_on = false;
-    cout<<"thread pool close"<<endl;
+    if (off_on) {
+        off_on = false;
+        cout<<"thread pool close"<<endl;
+    }
 }
 
-int jsq =0;
+atomic_int jsq = ATOMIC_FLAG_INIT;
+int self_jsq=0;
 int  getid(int n=4){
-    int val;
-    srand((int)time(NULL)+ ++jsq);
-    val = rand() % n;
-    return val;
+    self_jsq = jsq;
+    if (self_jsq >= n) {
+        jsq = 0;
+    }
+    ++jsq;
+    return self_jsq;
 }
 
 

@@ -1,47 +1,39 @@
 #include "all.h"
 #include "co.h"
 
+class V {
+public:
+    ~V(){
+        cout<<"exit"<<endl;
+    }
+};
+
+atomic_int id=ATOMIC_FLAG_INIT;
+
 void gen(){
+    // TODO 改进偶然性 错误
 
     string name = "aa";
-
-    auto v = yield [&]()->string{
+    yield [&]()->void*{
         sleep(1);
-        cout<<name<<endl;
-        return "this is worker 1";
+        ++id;
+        cout<<name<<","<<id<<endl;
     };
-    cout<<v.data<<endl;
 
-    v = yield [&]()->string{
+    auto val = yield [&]()->void*{ // 这里是个异步任务，主线程不阻塞，这些任务可并行执行, 会发生并发
         sleep(1);
-        //cout<<name<<endl;
-        return "this is worker 2";
+        ++id;
+        cout<<name<<","<<id<<endl;
+        int* ii = new int(123);
+        return (void*)ii;
     };
-    cout<<v.data<<endl;
-
-    /*auto v = worker([&](void* data)->void{
-        sleep(1);
-        cout<<name<<endl;
-        send(data,"abcdfasdfasdf");
-        sleep(1);
-    });
-    cout<<v<<endl;
-
-    v = worker([&](void* data)->void{
-        sleep(1);
-        cout<<name<<endl;
-        send(data,"1111111111111");
-        sleep(1);
-    });
-    cout<<v<<endl; */
-    //close();
-
-    aco_exit();
+    cout<<*(int*)val<<endl;
+    close();
 }
 
 
 int main(){
-    co(gen);
-    co(gen);
-    loop();
+   co(gen);
+   co(gen);
+   loop();
 }

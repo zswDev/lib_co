@@ -4,21 +4,21 @@
 #include "util.h"
 #include "pool.h"
 
-#define yield  c +
+#define yield  gt +
 
 atomic<bool> isInit = {false};
 
 struct  Message {
     long tid;
-    string data;
+    void* data;
 };
 
 unordered_map<long,aco_t*> tid_um;
 aco_t* main_co = NULL;
 aco_share_stack_t* sstk = NULL;
-long l = 0;
+atomic_long l = ATOMIC_FLAG_INIT;
 long get_tid (){
-    return getNow() + ++l;
+    return ++l;
 }
 void init(){
     aco_thread_init(NULL);
@@ -37,6 +37,14 @@ void close(){
     evt_close();
     end();
 }
+
+void box(){
+    Message* msg = (Message*)aco_get_arg();
+    aco_cofuncp_t run = (aco_cofuncp_t) msg->data;
+    run();
+    aco_exit();
+}
+
 class th{
 private:
     Message msg;
@@ -47,10 +55,11 @@ public:
             init();
             isInit = true;
         }
-        co = aco_create(main_co, sstk,0,fp,&msg); 
+        // 第一次传递的 是运行函数，
+        msg.data = (void*)fp;
+        co = aco_create(main_co, sstk,0,box,&msg); 
         msg.tid = get_tid();
         tid_um[msg.tid] = co;
-
         aco_resume(co);
     }
 };
@@ -59,30 +68,28 @@ void co(aco_cofuncp_t fp) {
     th* t = new th(fp);
 }
 
-string worker(function<void(void* data)> cb){
+void* worker(function<void(void* data)> cb){
     Message* self = (Message*)aco_get_arg();
     add_task(self,cb); 
     aco_yield();
     return self->data;
 }
 
-void send(void* msg, string data){
+void send(void* msg, void* data){
     Message* mess = (Message*) msg;
     mess->data = data;
     evt_emit("run",msg);
 }
 
-class Co{
+class Gen{
 public:
-    string data;
-    Co operator+(function<string()> func){
-        string data = worker([&](void* data)->void {
-            string val = func();
+    void* data;
+    void* operator+(function<void* ()> func){
+        void* result = worker([&](void* data)->void{
+            void* val = func();
             send(data,val);
         });
-        Co c1;
-        c1.data = data;
-        return c1;
+        return result;
     }
 };
-Co c;
+Gen gt;
