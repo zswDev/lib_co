@@ -11,14 +11,13 @@ example:
     ./run main.cpp
 ```
 New writing method;
-```c++
+```c++i
     co([]()->void{
         auto v = yield [&]()->void* {
             // TODO Asynchronous task, Run in thread pool
             return null;
         }
-        cout<<v.data<<endl;
-        aco_exit();
+        cout<<v<<endl;
     })
     loop();
 
