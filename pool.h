@@ -27,9 +27,10 @@ void work(int idx){
 
     while(off_on){
         // TODO 无任务尝试从 其他线程窃取，或从全局队列拿
+        // TODO 无任务则处于 阻塞或休眠状态，外部进行唤醒
         usleep(1000);
         st.self_look.lock();
-        while(!self_queue.empty()) {
+        while(!self_queue.empty()) { 
             Task t1 = self_queue.front();
             printf("t-%i:\n",idx);
             t1.func(t1.data);
@@ -80,6 +81,11 @@ void add_task(void* data,Func f1) {
     vt->self_look.lock();
     vt->task->push(t1);
     vt->self_look.unlock();
+}
+void wait(){
+    for(;;){
+        usleep(1000);
+    }
 }
 
 /*

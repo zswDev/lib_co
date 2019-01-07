@@ -25,13 +25,9 @@ void init(){
     main_co = aco_create(NULL,NULL,0,NULL,NULL);
     sstk = aco_share_stack_new(0);
 
-    evt_on("run", [](void* data){
-        Message* self = (Message*)data;
-        aco_resume(tid_um[self->tid]);
-    });
-
     start();
 }
+
 
 void close(){
     evt_close();
@@ -78,7 +74,7 @@ void* worker(function<void(void* data)> cb){
 void send(void* msg, void* data){
     Message* mess = (Message*) msg;
     mess->data = data;
-    evt_emit("run",msg);
+    aco_resume(tid_um[mess->tid]); // 直接在线程中 恢复 协程
 }
 
 class Gen{
