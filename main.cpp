@@ -13,7 +13,7 @@ atomic_int id=ATOMIC_FLAG_INIT;
 void gen(){
     // TODO 改进偶然性 错误
     int value = 123;
-    evt_emit("data",&value);
+    evt_emit("data",&value); // 监听事件都会 在主线程执行!!
 
     string name = "aa";
     yield [&]()->void*{
