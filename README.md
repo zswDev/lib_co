@@ -11,9 +11,20 @@ example:
     ./run main.cpp
 ```
 New writing method;
-```c++i
+```c++11
+    Chan ch;
     co([]()->void{
         auto v = yield [&]()->void* {
+            c_write(ch, 123); // golang_channel
+            // TODO Asynchronous task, Run in thread pool
+            return null;
+        }
+        cout<<v<<endl;
+    })
+    co([]()->void{
+        auto v = yield [&]()->void* {
+            auto v = c_read(ch)
+            cout<<v<<endl;
             // TODO Asynchronous task, Run in thread pool
             return null;
         }
