@@ -82,11 +82,11 @@ void add_task(void* data,Func f1) {
     vt->task->push(t1);
     vt->self_look.unlock();
 }
-void wait(){
-    for(;;){
-        usleep(1000);
-    }
-}
+// void wait(){
+//     for(;;){
+//         usleep(1000);
+//     }
+// }
 
 /*
    metux vtask： 线程添加队列 ，

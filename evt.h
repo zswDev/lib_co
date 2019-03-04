@@ -41,8 +41,43 @@ void evt_close(){
         cout<<"event loop close"<<endl;
     }
 }
+
+
+atomic_long idx = ATOMIC_FLAG_INIT;
+
+class Chan {
+public:
+    long id=0;
+    int data=0;
+    aco_t* write=NULL;
+    aco_t* read=NULL;
+    Chan() {
+        id = ++idx;
+    }
+};
+Chan c;
+queue<Chan*> msg;
+void c_write(Chan& c, int data){
+    // 暂停当前协程，在队列里等待写入到
+    msg.push(&c);
+    c.data = data;
+    c.write = aco_get_co();
+    aco_yield();
+}
+int c_read(Chan& c) {
+    // 暂停当前协程，在队列里等待读取到
+    c.read = aco_get_co();
+    aco_yield();
+    // 开一个线程恢复 write
+    return c.data;
+}
+
 void loop(){
     Node n1;
+    Chan* c1;
+    aco_t* ch_read;
+    aco_t* ch_write;
+
     while(isExit) {
         usleep(1000);
         look.unlock();
@@ -55,6 +90,18 @@ void loop(){
             }
             task.pop();
         }
+        while(!msg.empty()){
+            c1 = msg.front();
+            ch_read = c1->read;
+            ch_write = c1->write;
+            if(ch_read != NULL && ch_write != NULL) {
+                // 在线程中恢复协程
+                evt_emit("golang_channel", ch_read);
+                evt_emit("golang_channel", ch_write);
+                msg.pop();
+            }
+        }
+        
         look.unlock();
     }
 }

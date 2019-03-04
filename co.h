@@ -25,6 +25,14 @@ void init(){
     main_co = aco_create(NULL,NULL,0,NULL,NULL);
     sstk = aco_share_stack_new(0);
 
+    evt_on("golang_channel", [](void* data){
+        aco_t* co1 = (aco_t*)data;    
+        cout<<co1<<endl;
+        add_task(NULL,[co1](void* data)->void{
+            aco_resume(co1);
+        });
+    });
+
     start();
 }
 
